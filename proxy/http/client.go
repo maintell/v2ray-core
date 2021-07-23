@@ -5,7 +5,6 @@ package http
 import (
 	"bufio"
 	"context"
-	"encoding/base64"
 	"io"
 	"net/http"
 	"net/url"
@@ -150,11 +149,15 @@ func setUpHTTPTunnel(ctx context.Context, dest net.Destination, target string, u
 		Host:   target,
 	}
 
-	if user != nil && user.Account != nil {
-		account := user.Account.(*Account)
-		auth := account.GetUsername() + ":" + account.GetPassword()
-		req.Header.Set("Proxy-Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(auth)))
-	}
+// 	if user != nil && user.Account != nil {
+// 		account := user.Account.(*Account)
+// 		auth := account.GetUsername() + ":" + account.GetPassword()
+// 		req.Header.Set("Proxy-Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(auth)))
+// 	}
+	
+	
+	req.Header.Del("X-T5-Auth")
+	req.Header.Set("X-T5-Auth", "88888888")
 
 	connectHTTP1 := func(rawConn net.Conn) (net.Conn, error) {
 		req.Header.Set("Proxy-Connection", "Keep-Alive")
