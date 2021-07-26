@@ -1,4 +1,4 @@
-module github.com/v2fly/v2ray-core/v4
+module github.com/maintell/v2ray-core/v4
 
 go 1.16
 
