@@ -1,5 +1,3 @@
-// +build !confonly
-
 package outbound
 
 //go:generate go run github.com/v2fly/v2ray-core/v4/common/errors/errorgen
@@ -14,6 +12,7 @@ import (
 	"github.com/v2fly/v2ray-core/v4/common/net"
 	"github.com/v2fly/v2ray-core/v4/common/protocol"
 	"github.com/v2fly/v2ray-core/v4/common/retry"
+	"github.com/v2fly/v2ray-core/v4/common/serial"
 	"github.com/v2fly/v2ray-core/v4/common/session"
 	"github.com/v2fly/v2ray-core/v4/common/signal"
 	"github.com/v2fly/v2ray-core/v4/common/task"
@@ -27,6 +26,23 @@ import (
 func init() {
 	common.Must(common.RegisterConfig((*Config)(nil), func(ctx context.Context, config interface{}) (interface{}, error) {
 		return New(ctx, config.(*Config))
+	}))
+
+	common.Must(common.RegisterConfig((*SimplifiedConfig)(nil), func(ctx context.Context, config interface{}) (interface{}, error) {
+		simplifiedClient := config.(*SimplifiedConfig)
+		fullClient := &Config{Vnext: []*protocol.ServerEndpoint{
+			{
+				Address: simplifiedClient.Address,
+				Port:    simplifiedClient.Port,
+				User: []*protocol.User{
+					{
+						Account: serial.ToTypedMessage(&vless.Account{Id: simplifiedClient.Uuid, Encryption: "none"}),
+					},
+				},
+			},
+		}}
+
+		return common.CreateObject(ctx, fullClient)
 	}))
 }
 
@@ -127,12 +143,12 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 			return err // ...
 		}
 
-		// Flush; bufferWriter.WriteMultiBufer now is bufferWriter.writer.WriteMultiBuffer
+		// Flush; bufferWriter.WriteMultiBuffer now is bufferWriter.writer.WriteMultiBuffer
 		if err := bufferWriter.SetBuffered(false); err != nil {
 			return newError("failed to write A request payload").Base(err).AtWarning()
 		}
 
-		// from clientReader.ReadMultiBuffer to serverWriter.WriteMultiBufer
+		// from clientReader.ReadMultiBuffer to serverWriter.WriteMultiBuffer
 		if err := buf.Copy(clientReader, serverWriter, buf.UpdateActivity(timer)); err != nil {
 			return newError("failed to transfer request payload").Base(err).AtInfo()
 		}
@@ -151,7 +167,7 @@ func (h *Handler) Process(ctx context.Context, link *transport.Link, dialer inte
 		// default: serverReader := buf.NewReader(conn)
 		serverReader := encoding.DecodeBodyAddons(conn, request, responseAddons)
 
-		// from serverReader.ReadMultiBuffer to clientWriter.WriteMultiBufer
+		// from serverReader.ReadMultiBuffer to clientWriter.WriteMultiBuffer
 		if err := buf.Copy(serverReader, clientWriter, buf.UpdateActivity(timer)); err != nil {
 			return newError("failed to transfer response payload").Base(err).AtInfo()
 		}

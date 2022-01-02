@@ -1,3 +1,4 @@
+//go:build !confonly
 // +build !confonly
 
 package dispatcher
@@ -13,7 +14,7 @@ import (
 	"github.com/v2fly/v2ray-core/v4/features/dns"
 )
 
-// newFakeDNSSniffer Create a Fake DNS metadata sniffer
+// newFakeDNSSniffer Creates a Fake DNS metadata sniffer
 func newFakeDNSSniffer(ctx context.Context) (protocolSnifferWithMetadata, error) {
 	var fakeDNSEngine dns.FakeDNSEngine
 	err := core.RequireFeatures(ctx, func(fdns dns.FakeDNSEngine) {
@@ -85,8 +86,7 @@ func (f DNSThenOthersSniffResult) Domain() string {
 	return f.domainName
 }
 
-func newFakeDNSThenOthers(ctx context.Context, fakeDNSSniffer protocolSnifferWithMetadata, others []protocolSnifferWithMetadata) (
-	protocolSnifferWithMetadata, error) { // nolint: unparam
+func newFakeDNSThenOthers(ctx context.Context, fakeDNSSniffer protocolSnifferWithMetadata, others []protocolSnifferWithMetadata) (protocolSnifferWithMetadata, error) { // nolint: unparam
 	// ctx may be used in the future
 	_ = ctx
 	return protocolSnifferWithMetadata{

@@ -1,5 +1,3 @@
-// +build !confonly
-
 package freedom
 
 //go:generate go run github.com/v2fly/v2ray-core/v4/common/errors/errorgen
@@ -32,6 +30,13 @@ func init() {
 			return nil, err
 		}
 		return h, nil
+	}))
+
+	common.Must(common.RegisterConfig((*SimplifiedConfig)(nil), func(ctx context.Context, config interface{}) (interface{}, error) {
+		simplifiedServer := config.(*SimplifiedConfig)
+		_ = simplifiedServer
+		fullConfig := &Config{}
+		return common.CreateObject(ctx, fullConfig)
 	}))
 }
 

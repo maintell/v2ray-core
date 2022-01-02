@@ -11,6 +11,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/app/commander"
@@ -44,10 +45,10 @@ func TestCommanderRemoveHandler(t *testing.T) {
 	clientPort := tcp.PickPort()
 	cmdPort := tcp.PickPort()
 	clientConfig := &core.Config{
-		App: []*serial.TypedMessage{
+		App: []*anypb.Any{
 			serial.ToTypedMessage(&commander.Config{
 				Tag: "api",
-				Service: []*serial.TypedMessage{
+				Service: []*anypb.Any{
 					serial.ToTypedMessage(&command.Config{}),
 				},
 			}),
@@ -142,10 +143,10 @@ func TestCommanderAddRemoveUser(t *testing.T) {
 	cmdPort := tcp.PickPort()
 	serverPort := tcp.PickPort()
 	serverConfig := &core.Config{
-		App: []*serial.TypedMessage{
+		App: []*anypb.Any{
 			serial.ToTypedMessage(&commander.Config{
 				Tag: "api",
-				Service: []*serial.TypedMessage{
+				Service: []*anypb.Any{
 					serial.ToTypedMessage(&command.Config{}),
 				},
 			}),
@@ -182,7 +183,7 @@ func TestCommanderAddRemoveUser(t *testing.T) {
 						{
 							Account: serial.ToTypedMessage(&vmess.Account{
 								Id:      u1.String(),
-								AlterId: 64,
+								AlterId: 0,
 							}),
 						},
 					},
@@ -210,7 +211,7 @@ func TestCommanderAddRemoveUser(t *testing.T) {
 
 	clientPort := tcp.PickPort()
 	clientConfig := &core.Config{
-		App: []*serial.TypedMessage{
+		App: []*anypb.Any{
 			serial.ToTypedMessage(&policy.Config{
 				Level: map[uint32]*policy.Policy{
 					0: {
@@ -249,7 +250,7 @@ func TestCommanderAddRemoveUser(t *testing.T) {
 								{
 									Account: serial.ToTypedMessage(&vmess.Account{
 										Id:      u2.String(),
-										AlterId: 64,
+										AlterId: 0,
 										SecuritySettings: &protocol.SecurityConfig{
 											Type: protocol.SecurityType_AES128_GCM,
 										},
@@ -286,7 +287,7 @@ func TestCommanderAddRemoveUser(t *testing.T) {
 					Email: "test@v2fly.org",
 					Account: serial.ToTypedMessage(&vmess.Account{
 						Id:      u2.String(),
-						AlterId: 64,
+						AlterId: 0,
 					}),
 				},
 			}),
@@ -323,11 +324,11 @@ func TestCommanderStats(t *testing.T) {
 	cmdPort := tcp.PickPort()
 
 	serverConfig := &core.Config{
-		App: []*serial.TypedMessage{
+		App: []*anypb.Any{
 			serial.ToTypedMessage(&stats.Config{}),
 			serial.ToTypedMessage(&commander.Config{
 				Tag: "api",
-				Service: []*serial.TypedMessage{
+				Service: []*anypb.Any{
 					serial.ToTypedMessage(&statscmd.Config{}),
 				},
 			}),
@@ -377,7 +378,7 @@ func TestCommanderStats(t *testing.T) {
 							Email: "test",
 							Account: serial.ToTypedMessage(&vmess.Account{
 								Id:      userID.String(),
-								AlterId: 64,
+								AlterId: 0,
 							}),
 						},
 					},
@@ -433,7 +434,7 @@ func TestCommanderStats(t *testing.T) {
 								{
 									Account: serial.ToTypedMessage(&vmess.Account{
 										Id:      userID.String(),
-										AlterId: 64,
+										AlterId: 0,
 										SecuritySettings: &protocol.SecurityConfig{
 											Type: protocol.SecurityType_AES128_GCM,
 										},
